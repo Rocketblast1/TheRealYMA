@@ -9,12 +9,13 @@ export default PlayerControls = ({ Player }) => {
     const [playing, setPlaying] = useState(false)
     const handlePlay = async () => {
         const state = await Player.getState();
+        console.log(state);
         if (state === State.Playing) {
             setPlaying(false)
             Player.pause();
         };
 
-        if (state === State.Paused) {
+        if (state === State.Paused || state === State.Ready) {
             setPlaying(true)
             Player.play();
         };

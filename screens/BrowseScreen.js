@@ -10,7 +10,7 @@ import {
 import Card from "../component/card";
 import storage from '@react-native-firebase/storage';
 import firestore from '@react-native-firebase/firestore';
-import { TrackContext } from "../component/trackContext";
+import { TrackContext } from "../contexts/trackContext";
 import FoundationIcon from "react-native-vector-icons/Foundation";
 import IonIcon from "react-native-vector-icons/Ionicons";
 
@@ -68,6 +68,7 @@ export default function BrowseScreen({ route }) {
             console.log(e)
         } finally {
             await Player.add(song).then(async () => {
+                Player.play()
                 await updateTrackQueue()
             })
         }

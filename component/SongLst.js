@@ -1,19 +1,46 @@
 import React, { useEffect, useContext, useState } from "react";
 import { Image, TouchableOpacity, Text, View, FlatList, StyleSheet, Dimensions } from "react-native";
-import { TrackContext } from "../component/trackContext";
+import { TrackContext } from "../contexts/trackContext";
 import FoundationIcon from "react-native-vector-icons/Foundation";
 import IonIcon from "react-native-vector-icons/Ionicons";
+import { State } from "react-native-track-player";
 
 const iconSize = 30;
 export default SongLst = ({ songs, update }) => {
     const Player = useContext(TrackContext)
-    const [mine, setMine] = useState([]);
     useEffect(() => {
-        setMine(songs)
-    }, [songs, mine]);
+    }, [songs /*, mine*/]);
+
+    const handleRemoveSongFromQueue = async (index) => {
+        if (index == 0 && ((await Player.getQueue()).length  == 1)) {
+            await Player.remove(index)
+            Player.pause()
+            Player.reset()
+            update()
+            console.log("One Song In Q:" + await Player.getQueue())
+        } else {
+            // If the removed song is the current song and there is more than one song in the queue...
+            if (index == await Player.getCurrentTrack() && ((await Player.getQueue()).length  > 1)) {
+                // If the player is playing or is ready to play....
+                if(await Player.getState() === (State.Playing || State.Ready) && ((await Player.getQueue()).length  > 1) ){
+                    Player.pause();
+                }
+                await Player.skipToNext().then(async () => {
+                    Player.remove(index);
+                    update()
+                    console.log("Curent Song Removed with more than 1 In Q: " + JSON.stringify(await Player.getQueue()))
+                });
+            } else {
+                await Player.remove(index)
+                update()
+                console.log("Curent Song Removed " + await Player.getQueue())
+            }
+        }
+    }
+
     return (
         <FlatList
-            data={mine}
+            data={songs}
             renderItem={({ item, index }) => (
                 <TouchableOpacity key={index} style={{ margin: 10, }} activeOpacity={0.85} onPress={() => {
                     Player.skip(index)
@@ -29,10 +56,8 @@ export default SongLst = ({ songs, update }) => {
                         </View>
                         <View style={styles.songButtonContainer}>
                             <FoundationIcon name={"x"} size={iconSize} color={"white"} onPress={async () => {
-                                Player.remove(index)
-                                mine.splice(index, 1)
-                                update()
-                                }} />
+                                handleRemoveSongFromQueue(index)
+                            }} />
                             <IonIcon name={"heart-outline"} size={iconSize} color={"white"} />
                         </View>
                     </View>

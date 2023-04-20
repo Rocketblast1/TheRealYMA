@@ -39,7 +39,7 @@ import MusicStack from "./stacks/MusicStack";
 import TrackPlayer, { State, useProgress } from 'react-native-track-player';
 
 //Contexts
-import { TrackContext,  } from "./component/trackContext";
+import { TrackContext } from './contexts/trackContext';
 
 
 export default App = () => {
